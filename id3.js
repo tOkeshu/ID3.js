@@ -208,7 +208,8 @@ var ID3 = (function() {
   }
 
   ID3v2Parser.tags = {
-    'TIT2': 'title'
+    'TIT2': 'title',
+    'TPE1': 'artist'
   }
 
   ID3v2Parser.prototype = {
