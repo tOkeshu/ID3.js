@@ -204,7 +204,59 @@ var ID3 = (function() {
     'Rock/Pop'
   ];
 
+  function ID3v2Parser() {
+  }
+
+  ID3v2Parser.tags = {
+    'TIT2': 'title'
+  }
+
+  ID3v2Parser.prototype = {
+    _parseFrames: function(view) {
+      var cursor = 0;
+      var frames = [];
+      var frame;
+
+      while (cursor < view.byteLength) {
+        frame = this._parseFrame(view.subarray(cursor));
+        frames.push(frame);
+        cursor += 10 + frame.size;
+      }
+
+      return frames;
+    },
+
+    _parseFrame: function(view) {
+      var id, size, description;
+
+      id = view.subarray(0, 4);
+      size = new DataView(view.buffer, view.byteOffset + 4, 4);
+      size = size.getUint32(0);
+      // XXX: here we skip the encoding byte
+      description = view.subarray(10 + 1, 10 + size);
+
+      return {id: id, description: description};
+    },
+
+    parse: function(view) {
+      var tagSize = new DataView(view.buffer, view.byteOffset + 6, 4);
+      tagSize = tagSize.getUint32(0);
+
+      var frames = this._parseFrames(view.subarray(10, 10 + tagSize));
+      var tags = frames.reduce(function(tags, frame) {
+        var id          = textDecoder.decode(frame.id);
+        var description = textDecoder.decode(frame.description);
+
+        tags[ID3v2Parser.tags[id]] = description
+        return tags;
+      }, {});
+
+      return tags;
+    }
+  };
+
   ID3.ID3v1Parser = ID3v1Parser;
+  ID3.ID3v2Parser = ID3v2Parser;
 
   return ID3;
 }());
