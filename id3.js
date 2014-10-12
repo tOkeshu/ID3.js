@@ -207,9 +207,26 @@ var ID3 = (function() {
   function ID3v2Parser() {
   }
 
+  ID3v2Parser.decoders = {
+    'string': function(description) {
+      return textDecoder.decode(description);
+    },
+
+    'integer': function(description) {
+      return parseInt(textDecoder.decode(description), 10);
+    }
+  }
+
   ID3v2Parser.tags = {
-    'TALB': 'album',
-    'TYER': 'year'
+    'TIT2': {name: 'title',  type: 'string'},
+    'TPE1': {name: 'artist', type: 'string'},
+    'TALB': {name: 'album',  type: 'string'},
+    'TYER': {name: 'year',   type: 'string'},
+    // XXX: we may want to have a tack type here as it can be
+    // something else than an integer. See TRCK frame description
+    // http://id3.org/id3v2.3.0#Declared_ID3v2_frames for more
+    // information.
+    'TRCK': {name: 'track',  type: 'integer'}
   }
 
   ID3v2Parser.prototype = {
@@ -246,9 +263,11 @@ var ID3 = (function() {
       var frames = this._parseFrames(view.subarray(10, 10 + tagSize));
       var tags = frames.reduce(function(tags, frame) {
         var id          = textDecoder.decode(frame.id);
-        var description = textDecoder.decode(frame.description);
+        var tag         = ID3v2Parser.tags[id];
+        var decode      = ID3v2Parser.decoders[tag.type];
 
-        tags[ID3v2Parser.tags[id]] = description
+        // XXX: only decode the tag if it is known in ID3v2Parser.tags
+        tags[tag.name] = decode(frame.description);
         return tags;
       }, {});
 
