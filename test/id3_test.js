@@ -57,6 +57,8 @@ var createMP3v2 = function(options) {
     frames["TPE1"] = textEncoder.encode("\u0000" + options.artist);
   if (options.album)
     frames["TALB"] = textEncoder.encode("\u0000" + options.album);
+  if (options.year)
+    frames["TYER"] = textEncoder.encode("\u0000" + options.year);
 
   size = Object.keys(frames).reduce(function(size, id) {
     size += 10 + frames[id].byteLength;
@@ -167,6 +169,12 @@ describe("ID3v2Parser", function() {
       var mp3 = createMP3v2({album: "Best of"});
       var tags = parser.parse(mp3);
       expect(tags.album).to.equal("Best of");
+    });
+
+    it("should extract the year", function() {
+      var mp3 = createMP3v2({year: "1984"});
+      var tags = parser.parse(mp3);
+      expect(tags.year).to.equal("1984");
     });
 
   });

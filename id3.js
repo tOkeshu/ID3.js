@@ -208,8 +208,8 @@ var ID3 = (function() {
   }
 
   ID3v2Parser.tags = {
-    'TPE1': 'artist',
-    'TALB': 'album'
+    'TALB': 'album',
+    'TYER': 'year'
   }
 
   ID3v2Parser.prototype = {
