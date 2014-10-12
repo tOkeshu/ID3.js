@@ -55,6 +55,8 @@ var createMP3v2 = function(options) {
     frames["TIT2"] = textEncoder.encode("\u0000" + options.title);
   if (options.artist)
     frames["TPE1"] = textEncoder.encode("\u0000" + options.artist);
+  if (options.album)
+    frames["TALB"] = textEncoder.encode("\u0000" + options.album);
 
   size = Object.keys(frames).reduce(function(size, id) {
     size += 10 + frames[id].byteLength;
@@ -159,6 +161,12 @@ describe("ID3v2Parser", function() {
       var mp3 = createMP3v2({artist: "Best artist EVAR"});
       var tags = parser.parse(mp3);
       expect(tags.artist).to.equal("Best artist EVAR");
+    });
+
+    it("should extract the album", function() {
+      var mp3 = createMP3v2({album: "Best of"});
+      var tags = parser.parse(mp3);
+      expect(tags.album).to.equal("Best of");
     });
 
   });
