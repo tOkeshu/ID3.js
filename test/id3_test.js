@@ -179,11 +179,15 @@ describe("ID3v2Parser", function() {
       expect(tags.year).to.equal("1984");
     });
 
+    it("should extract the comment");
+
     it("should extract the track number", function() {
       var mp3 = createMP3v2({track: 10});
       var tags = parser.parse(mp3);
       expect(tags.track).to.equal(10);
     });
+
+    it("should extract the genre");
 
   });
 
