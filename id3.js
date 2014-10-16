@@ -253,7 +253,7 @@ var ID3 = (function() {
       // XXX: here we skip the encoding byte
       description = view.subarray(10 + 1, 10 + size);
 
-      return {id: id, description: description};
+      return {id: id, description: description, size: size};
     },
 
     parse: function(view) {
@@ -262,12 +262,16 @@ var ID3 = (function() {
 
       var frames = this._parseFrames(view.subarray(10, 10 + tagSize));
       var tags = frames.reduce(function(tags, frame) {
-        var id          = textDecoder.decode(frame.id);
-        var tag         = ID3v2Parser.tags[id];
-        var decode      = ID3v2Parser.decoders[tag.type];
+        var id  = textDecoder.decode(frame.id);
+        var tag = ID3v2Parser.tags[id];
+        var decode;
 
-        // XXX: only decode the tag if it is known in ID3v2Parser.tags
-        tags[tag.name] = decode(frame.description);
+        // We only decode the tag if it is known in ID3v2Parser.tags
+        if (tag) {
+          decode = ID3v2Parser.decoders[tag.type];
+          tags[tag.name] = decode(frame.description);
+        }
+
         return tags;
       }, {});
 

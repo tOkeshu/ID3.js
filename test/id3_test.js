@@ -142,6 +142,13 @@ describe("ID3v1Parser", function() {
       expect(tags.genre).to.equal('Metal');
     });
 
+    it("should extract multiple tags", function() {
+      var mp3 = createMP3({title: "Much Tags, Wow", track: 10});
+      var tags = parser.parse(mp3);
+      expect(tags.title).to.equal("Much Tags, Wow");
+      expect(tags.track).to.equal(10);
+    });
+
   });
 
 });
@@ -188,6 +195,13 @@ describe("ID3v2Parser", function() {
     });
 
     it("should extract the genre");
+
+    it("should extract multiple frames", function() {
+      var mp3 = createMP3v2({title: "Much Tags, Wow", track: 10});
+      var tags = parser.parse(mp3);
+      expect(tags.title).to.equal("Much Tags, Wow");
+      expect(tags.track).to.equal(10);
+    });
 
   });
 
