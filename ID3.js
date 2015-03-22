@@ -28,20 +28,20 @@ var ID3 = (function() {
       };
       view = view.subarray(view.byteLength - 128 + 3);
 
-      var title = utf16.decode(view.subarray(0, 30));
+      var title = latin1.decode(view.subarray(0, 30));
       tags.title = rmPadding(title);
 
-      var artist = utf16.decode(view.subarray(30, 60));
+      var artist = latin1.decode(view.subarray(30, 60));
       tags.artist = rmPadding(artist);
 
-      var album = utf16.decode(view.subarray(60, 90));
+      var album = latin1.decode(view.subarray(60, 90));
       tags.album = rmPadding(album);
 
-      var year = utf16.decode(view.subarray(90, 94));
+      var year = latin1.decode(view.subarray(90, 94));
       tags.year = rmPadding(year);
 
       var comment =
-        utf16.decode(view.subarray(94, 124));
+        latin1.decode(view.subarray(94, 124));
       tags.comment = rmPadding(comment);
 
       if (view[122] === 0)

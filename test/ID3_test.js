@@ -1,11 +1,12 @@
-var textEncoder = new TextEncoder("utf-8");
-var textDecoder = new TextDecoder("utf-8");
+// We can't have a latin1 encoder here, so we use utf-8 and make sure
+// we don't use non-ascii characters.
+var utf8 = new TextEncoder("utf-8");
 
 var createMP3 = function(options) {
   var buffer = new ArrayBuffer(4 + 128); // junk + tags
   var view = new Uint8Array(buffer);
-  var junk = textEncoder.encode("JUNK");
-  var tag  = textEncoder.encode("TAG");
+  var junk = utf8.encode("JUNK");
+  var tag  = utf8.encode("TAG");
   var offset = junk.byteLength + tag.byteLength;
 
   view.set(junk);
@@ -14,21 +15,19 @@ var createMP3 = function(options) {
   options = options || {};
 
   if (options.title)
-    view.set(textEncoder.encode(options.title), offset);
+    view.set(utf8.encode(options.title), offset);
   if (options.artist)
-    view.set(textEncoder.encode(options.artist), offset + 30);
+    view.set(utf8.encode(options.artist), offset + 30);
   if (options.album)
-    view.set(textEncoder.encode(options.album), offset + 60);
+    view.set(utf8.encode(options.album), offset + 60);
   if (options.year)
-    view.set(textEncoder.encode(options.year), offset + 90);
+    view.set(utf8.encode(options.year), offset + 90);
   if (options.comment)
-    view.set(textEncoder.encode(options.comment), offset + 94);
+    view.set(utf8.encode(options.comment), offset + 94);
   if (options.track)
     view.set([0, options.track], offset + 122);
   if (options.genre)
     view.set([ID3.genres.indexOf(options.genre)], offset + 124)
-
-  console.log(textDecoder.decode(view));
 
   return view;
 };
@@ -37,10 +36,10 @@ var createMP3v2 = function(options) {
   var buffer = new ArrayBuffer(128 + 4); // tags + junk
   var view = new Uint8Array(buffer);
   var header = new Uint8Array(10);
-  var junk = textEncoder.encode("JUNK");
+  var junk = utf8.encode("JUNK");
 
   // var header   = new Uint8Array([73, 68, 51, 3, 0, 0]);
-  var id3     = textEncoder.encode("ID3");
+  var id3     = utf8.encode("ID3");
   var version = new Uint8Array([3, 0]);
   var flags   = new Uint8Array([0]);
   var size, frames = {};
@@ -52,15 +51,15 @@ var createMP3v2 = function(options) {
   options = options || {};
 
   if (options.title)
-    frames["TIT2"] = textEncoder.encode("\u0000" + options.title);
+    frames["TIT2"] = utf8.encode("\u0000" + options.title);
   if (options.artist)
-    frames["TPE1"] = textEncoder.encode("\u0000" + options.artist);
+    frames["TPE1"] = utf8.encode("\u0000" + options.artist);
   if (options.album)
-    frames["TALB"] = textEncoder.encode("\u0000" + options.album);
+    frames["TALB"] = utf8.encode("\u0000" + options.album);
   if (options.year)
-    frames["TYER"] = textEncoder.encode("\u0000" + options.year);
+    frames["TYER"] = utf8.encode("\u0000" + options.year);
   if (options.track)
-    frames["TRCK"] = textEncoder.encode("\u0000" + options.track);
+    frames["TRCK"] = utf8.encode("\u0000" + options.track);
 
   size = Object.keys(frames).reduce(function(size, id) {
     size += 10 + frames[id].byteLength;
@@ -73,7 +72,7 @@ var createMP3v2 = function(options) {
   var cursor = 0;
   var tag = Object.keys(frames).reduce(function(tag, id) {
     var frame = frames[id];
-    tag.set(textEncoder.encode(id), cursor);
+    tag.set(utf8.encode(id), cursor);
     tag.set([0, 0, 0, frame.byteLength], cursor + 4);
     tag.set([0, 0], cursor + 8);
     tag.set(frame, cursor + 10);
@@ -85,8 +84,6 @@ var createMP3v2 = function(options) {
   mp3.set(header);
   mp3.set(tag, header.byteLength);
   mp3.set(junk, header.byteLength + tag.byteLength);
-
-  console.log(textDecoder.decode(mp3));
 
   return mp3;
 };
